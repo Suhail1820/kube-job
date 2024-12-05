@@ -3,30 +3,25 @@ name: Deploy to Minikube
 on:
   push:
     branches:
-      - kube-jobs  # Trigger the workflow on pushes to the 'kube-jobs' branch
+      - '*'  # Trigger the workflow on pushes to any branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Use Ubuntu runner for deployment
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # Checkout the latest version of the repo
-
+        uses: actions/checkout@v2
       - name: Set up kubectl
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"  # Install kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
       - name: Start Minikube
         run: |
-          minikube start --driver=docker  # Start Minikube with Docker driver
-
+          minikube start --driver=docker
       - name: Set up KubeConfig
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config  # Set up Kubernetes config from GitHub Secrets
-
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s/job.yaml  # Apply the Job YAML to Minikube
-          kubectl get jobs  # Verify the job has been created
+          kubectl apply -f k8s/job.yaml
+          kubectl get jobs
