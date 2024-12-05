@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: complex-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: process-container
+        image: busybox  # Using BusyBox for simplicity; replace it with your application image if needed
+        command: ["/bin/sh", "-c", "echo 'Starting process'; sleep 10; echo 'Process complete';"]
+        # Simulating a task: print message, sleep, then print another message
+      restartPolicy: Never  # The job does not restart after completion
+  backoffLimit: 3  # Retry the job up to 3 times if it fails
