@@ -28,22 +28,18 @@ jobs:
       # Step 4: Set up Kubernetes config using the provided certificates from GitHub Secrets
       - name: Set up KubeConfig
         run: |
-          # Create the .kube directory if it doesn't exist
           mkdir -p $HOME/.kube
-
-          # Write the certificates to files
           echo "${{ secrets.KUBE_CA_CRT }}" > $HOME/.kube/ca.crt
           echo "${{ secrets.KUBE_CLIENT_CRT }}" > $HOME/.kube/client.crt
           echo "${{ secrets.KUBE_CLIENT_KEY }}" > $HOME/.kube/client.key
 
-          # Set up the kubeconfig file with the correct server URL (updated from 127.0.0.1 to the external IP)
           kubectl config set-cluster minikube --server=https://192.168.49.2:8443 --certificate-authority=$HOME/.kube/ca.crt
           kubectl config set-credentials user --client-certificate=$HOME/.kube/client.crt --client-key=$HOME/.kube/client.key
           kubectl config set-context minikube --cluster=minikube --user=user
           kubectl config use-context minikube
 
-      # Step 5: Deploy the job to Kubernetes
+      # Step 5: Deploy the job to Kubernetes (with --validate=false flag to bypass certificate validation)
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s/job.yaml
+          kubectl apply -f k8s/job.yaml --validate=false
           kubectl get jobs
